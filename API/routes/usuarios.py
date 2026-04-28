@@ -34,3 +34,5 @@ def eliminar_usuario(id: int, session: Session = Depends(get_session)):
     session.delete(usuario)
     session.commit()
     return {"mensaje": "eliminado"}
+
+
