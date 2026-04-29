@@ -1,0 +1,40 @@
+<h2>Restaurantes</h2>
+
+<div *ngFor="let r of restaurantes">
+  <button (click)="seleccionarRestaurante(r)">
+    {{ r.nombre }}
+  </button>
+</div>
+
+<hr>
+
+<div *ngIf="restauranteSeleccionado">
+
+  <h2>Menú de {{ restauranteSeleccionado.nombre }}</h2>
+
+  <div *ngFor="let producto of restauranteSeleccionado.menu">
+    <h3>{{ producto.nombre }}</h3>
+    <p>Precio: {{ producto.precio }}</p>
+    <button (click)="agregar(producto)">Agregar</button>
+    <hr>
+  </div>
+
+  <h2>Carrito</h2>
+
+  <div *ngFor="let item of carrito">
+    <p>
+      {{ item.nombre }} - Cantidad: {{ item.cantidad }}
+    </p>
+
+    <button (click)="eliminar(item.id)">
+      Eliminar
+    </button>
+  </div>
+
+  <h3>Total: {{ total }}</h3>
+
+  <button (click)="confirmarPedido()">
+    Confirmar pedido
+  </button>
+
+</div>
