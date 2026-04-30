@@ -17,6 +17,7 @@ app.include_router(pedidos.router)
 app.include_router(pagos.router)
 app.include_router(calificaciones.router)
 
+
 @app.get("/", tags=["Root"])
 def root():
     return {"mensaje": "Restaurantes API funcionando ✅"}
