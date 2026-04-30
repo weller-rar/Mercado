@@ -10,7 +10,7 @@ class Usuario(Base):
     id_usuario = Column(Integer, primary_key=True, index=True)
     nombre = Column(String, nullable=False)
     telefono = Column(String, nullable=False)
-
+    contrasena = Column(String, nullable=False)
 
 class Restaurante(Base):
     __tablename__ = "restaurantes"
