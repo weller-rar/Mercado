@@ -1,2 +1,4 @@
 entra a la carpeta con cd angular-app y 
 lanza el servidor con ng serve --open
+
+ng serve

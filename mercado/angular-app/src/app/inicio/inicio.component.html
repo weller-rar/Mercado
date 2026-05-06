@@ -1,0 +1,147 @@
+<!-- Carrito flotante -->
+<app-carrito></app-carrito>
+
+<!-- Header -->
+<header class="top-header">
+  <div class="logo"><div class="logo-mark">🍽️</div><span class="logo-text">Court<span>Eats</span></span></div>
+  <button class="icon-btn" (click)="logout()" title="Salir">👤</button>
+</header>
+
+<!-- ══════ VISTA: MENÚ DEL RESTAURANTE ══════ -->
+<div *ngIf="restauranteSeleccionado" class="menu-view">
+
+  <div class="menu-hero" [style.backgroundImage]="restauranteSeleccionado.imagen_url?'url('+restauranteSeleccionado.imagen_url+')':''">
+    <div class="menu-hero-overlay">
+      <button class="btn-back" (click)="volverALista()">← Volver</button>
+      <div class="menu-hero-info">
+        <h1>{{ restauranteSeleccionado.nombre }}</h1>
+        <p *ngIf="restauranteSeleccionado.descripcion">{{ restauranteSeleccionado.descripcion }}</p>
+        <div class="menu-hero-meta">
+          <span>⭐ {{ restauranteSeleccionado.calificacion_promedio | number:'1.1-1' }}</span>
+          <span *ngIf="restauranteSeleccionado.horario">🕐 {{ restauranteSeleccionado.horario }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="loading-wrap" *ngIf="loadingMenus"><div class="loader-ring"></div><p>Cargando menú...</p></div>
+  <div class="empty-wrap" *ngIf="!loadingMenus && menus.length===0"><p>Este restaurante aún no tiene menú.</p></div>
+
+  <div class="menus-container" *ngIf="!loadingMenus && menus.length>0">
+    <div class="menu-section" *ngFor="let menu of menus">
+      <h2 class="menu-section-title">{{ menu.nombre_menu }}</h2>
+      <div class="productos-loading" *ngIf="!productosCache[menu.id_menu]"><div class="loader-ring small"></div></div>
+      <div class="empty-productos" *ngIf="productosCache[menu.id_menu] && productosCache[menu.id_menu].length===0"><p>No hay platos disponibles.</p></div>
+
+      <div class="productos-grid" *ngIf="productosCache[menu.id_menu] && productosCache[menu.id_menu].length>0">
+        <div class="producto-card" *ngFor="let p of productosCache[menu.id_menu]">
+          <div class="producto-img" [style.backgroundImage]="p.imagen_url?'url('+p.imagen_url+')':''" [class.producto-img-placeholder]="!p.imagen_url">
+            <span *ngIf="!p.imagen_url" class="producto-emoji">🍽</span>
+          </div>
+          <div class="producto-body">
+            <div class="producto-nombre">{{ p.nombre }}</div>
+            <div class="producto-desc" *ngIf="p.descripcion">{{ p.descripcion }}</div>
+            <div class="producto-footer">
+              <div class="producto-precio">${{ p.precio | number:'1.0-0' }}</div>
+              <!-- Controles del carrito -->
+              <div class="carrito-ctrl" *ngIf="cantidad(p.id_producto)===0">
+                <button class="btn-agregar" (click)="agregar(p)">+ Agregar</button>
+              </div>
+              <div class="carrito-ctrl cantidad-ctrl" *ngIf="cantidad(p.id_producto)>0">
+                <button class="btn-ctrl" (click)="carritoSvc.reducir(p.id_producto)">−</button>
+                <span class="cant-num">{{ cantidad(p.id_producto) }}</span>
+                <button class="btn-ctrl add" (click)="agregar(p)">+</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══════ VISTA: LISTA / BÚSQUEDA ══════ -->
+<div *ngIf="!restauranteSeleccionado">
+
+  <div class="hero">
+    <div class="hero-pill">✨ Plaza Mayor · Nivel 2</div>
+    <h1>Pide sin<br><em>hacer filas</em></h1>
+    <p>Explora los restaurantes, elige lo que quieres y recíbelo en el mostrador.</p>
+  </div>
+
+  <div class="search-wrap">
+    <div class="search-bar">
+      <span class="search-icon">🔍</span>
+      <input type="text" placeholder="Busca un restaurante, menú o plato..." [(ngModel)]="searchText" (ngModelChange)="buscar()"/>
+      <button class="btn-clear" *ngIf="searchText" (click)="limpiarBusqueda()">✕</button>
+    </div>
+  </div>
+
+  <!-- Resultados búsqueda -->
+  <div *ngIf="buscando" class="resultados">
+    <div class="empty-wrap" *ngIf="!hayResultados"><p>No encontramos nada para "<strong>{{ searchText }}</strong>".</p></div>
+
+    <div class="resultado-grupo" *ngIf="resRestaurantes.length>0">
+      <div class="grupo-label">🏪 Restaurantes</div>
+      <div class="rest-grid">
+        <div class="rest-card" *ngFor="let r of resRestaurantes" (click)="abrirRestaurante(r)">
+          <div class="rest-img" [style.backgroundImage]="r.imagen_url?'url('+r.imagen_url+')':''" [class.rest-img-placeholder]="!r.imagen_url"><span *ngIf="!r.imagen_url" class="rest-emoji">🍽️</span></div>
+          <div class="rest-body">
+            <div class="rest-name">{{ r.nombre }}</div>
+            <div class="rest-desc" *ngIf="r.descripcion">{{ r.descripcion }}</div>
+            <div class="rest-meta"><span class="rest-rating">⭐ {{ r.calificacion_promedio|number:'1.1-1' }}</span></div>
+            <button class="btn-ver-menu">Ver menú →</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="resultado-grupo" *ngIf="resMenus.length>0">
+      <div class="grupo-label">📋 Menús</div>
+      <div class="lista-resultado">
+        <div class="item-resultado" *ngFor="let rm of resMenus" (click)="abrirDesdeResultado(rm.restaurante)">
+          <div class="item-icon">📋</div>
+          <div class="item-info"><div class="item-nombre">{{ rm.menu.nombre_menu }}</div><div class="item-sub">en <strong>{{ rm.restaurante.nombre }}</strong></div></div>
+          <span class="item-arrow">›</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="resultado-grupo" *ngIf="resProductos.length>0">
+      <div class="grupo-label">🍽 Platos</div>
+      <div class="productos-grid">
+        <div class="producto-card" *ngFor="let rp of resProductos" (click)="abrirDesdeResultado(rp.restaurante)">
+          <div class="producto-img" [style.backgroundImage]="rp.producto.imagen_url?'url('+rp.producto.imagen_url+')':''" [class.producto-img-placeholder]="!rp.producto.imagen_url"><span *ngIf="!rp.producto.imagen_url" class="producto-emoji">🍽</span></div>
+          <div class="producto-body">
+            <div class="producto-nombre">{{ rp.producto.nombre }}</div>
+            <div class="producto-desc" *ngIf="rp.producto.descripcion">{{ rp.producto.descripcion }}</div>
+            <div class="producto-rest">🏪 {{ rp.restaurante.nombre }}</div>
+            <div class="producto-precio">${{ rp.producto.precio|number:'1.0-0' }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Lista normal -->
+  <div *ngIf="!buscando">
+    <div class="loading-wrap" *ngIf="loading"><div class="loader-ring"></div><p>Cargando restaurantes...</p></div>
+    <div class="empty-wrap" *ngIf="!loading && restaurantes.length===0"><p>No hay restaurantes disponibles aún.</p></div>
+    <div class="section" *ngIf="!loading && restaurantes.length>0">
+      <div class="section-head"><h2>Restaurantes</h2><span class="count-badge">{{ restaurantes.length }}</span></div>
+      <div class="rest-grid">
+        <div class="rest-card" *ngFor="let r of restaurantes" (click)="abrirRestaurante(r)">
+          <div class="rest-img" [style.backgroundImage]="r.imagen_url?'url('+r.imagen_url+')':''" [class.rest-img-placeholder]="!r.imagen_url"><span *ngIf="!r.imagen_url" class="rest-emoji">🍽️</span></div>
+          <div class="rest-body">
+            <div class="rest-name">{{ r.nombre }}</div>
+            <div class="rest-desc" *ngIf="r.descripcion">{{ r.descripcion }}</div>
+            <div class="rest-meta"><span class="rest-rating">⭐ {{ r.calificacion_promedio|number:'1.1-1' }}</span><span class="rest-horario" *ngIf="r.horario">🕐 {{ r.horario }}</span></div>
+            <button class="btn-ver-menu">Ver menú →</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>

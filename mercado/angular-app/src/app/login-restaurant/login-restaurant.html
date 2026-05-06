@@ -1,0 +1,53 @@
+<div class="login-wrapper">
+  <div class="login-container">
+    <div class="login-header">
+      <h2>Acceso Restaurante</h2>
+      <p>Ingresa con tu ID comercial y contraseña</p>
+    </div>
+
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
+      <div class="form-group">
+        <label for="id_comercial">ID Comercial</label>
+        <input
+          type="text"
+          id="id_comercial"
+          formControlName="id_comercial"
+          placeholder="Ej: PizzasDonJuan2026"
+          [class.is-invalid]="loginForm.get('id_comercial')?.invalid && loginForm.get('id_comercial')?.touched"
+        />
+        <div class="error-message" *ngIf="loginForm.get('id_comercial')?.invalid && loginForm.get('id_comercial')?.touched">
+          <span *ngIf="loginForm.get('id_comercial')?.errors?.['required']">El ID comercial es requerido.</span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="contrasenaR">Contraseña</label>
+        <input
+          type="password"
+          id="contrasenaR"
+          formControlName="contrasena"
+          placeholder="••••••••"
+          [class.is-invalid]="loginForm.get('contrasena')?.invalid && loginForm.get('contrasena')?.touched"
+        />
+        <div class="error-message" *ngIf="loginForm.get('contrasena')?.invalid && loginForm.get('contrasena')?.touched">
+          <span *ngIf="loginForm.get('contrasena')?.errors?.['required']">La contraseña es requerida.</span>
+          <span *ngIf="loginForm.get('contrasena')?.errors?.['minlength']">Mínimo 6 caracteres.</span>
+        </div>
+      </div>
+
+      <div class="error-message" *ngIf="loginError" style="margin-bottom: 10px; font-weight: bold; text-align: center;">
+        {{ loginError }}
+      </div>
+
+      <button type="submit" class="submit-btn" [disabled]="isSubmitting">
+        <span *ngIf="!isSubmitting">Iniciar Sesión</span>
+        <span *ngIf="isSubmitting" class="spinner"></span>
+      </button>
+    </form>
+
+    <div class="login-footer">
+      <p>¿Eres cliente? <a routerLink="/login">Ingresa aquí</a></p>
+      <p>¿Quieres registrar tu restaurante? <a routerLink="/registro-restaurante">Solicitar registro</a></p>
+    </div>
+  </div>
+</div>

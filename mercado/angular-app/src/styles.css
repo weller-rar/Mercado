@@ -1,1 +1,23 @@
 /* You can add global styles to this file, and also import other style files */
+:root {
+  --peach: #F5C5A3;
+  --peach-light: #FAE0CC;
+  --peach-deep: #E8A87C;
+  --cream: #FDF6EE;
+  --beige: #F0E6D3;
+  --brown-soft: #C4956A;
+  --brown-dark: #7A5C40;
+  --olive: #8A9A6A;
+  --olive-light: #B8C99A;
+  --white: #FFFCF9;
+  --text-dark: #3D2B1A;
+  --text-mid: #7A6055;
+  --text-light: #B0998A;
+  --shadow-s: 0 2px 12px rgba(122,92,64,0.08);
+  --shadow-m: 0 6px 28px rgba(122,92,64,0.13);
+  --shadow-l: 0 16px 48px rgba(122,92,64,0.18);
+  --radius-s: 14px;
+  --radius-m: 22px;
+  --radius-l: 32px;
+  --radius-xl: 48px;
+}

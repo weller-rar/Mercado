@@ -1,0 +1,132 @@
+<!-- Botón flotante del carrito -->
+<button class="fab-carrito" (click)="abrir()" [class.tiene-items]="carritoSvc.totalItems() > 0">
+  🛒
+  <span class="fab-badge" *ngIf="carritoSvc.totalItems() > 0">{{ carritoSvc.totalItems() }}</span>
+</button>
+
+<!-- Panel lateral -->
+<div class="carrito-overlay" *ngIf="abierto" (click)="cerrar()"></div>
+<div class="carrito-panel" [class.abierto]="abierto">
+
+  <!-- ════ PASO: CARRITO ════ -->
+  <div *ngIf="paso === 'carrito'">
+    <div class="panel-header">
+      <h2>Mi carrito</h2>
+      <button class="btn-cerrar" (click)="cerrar()">✕</button>
+    </div>
+
+    <div class="panel-empty" *ngIf="carritoSvc.items().length === 0">
+      <div class="empty-icon">🛒</div>
+      <p>Tu carrito está vacío</p>
+      <small>Agrega platos desde el menú de cada restaurante</small>
+    </div>
+
+    <div class="panel-items" *ngIf="carritoSvc.items().length > 0">
+
+      <!-- Agrupar por restaurante -->
+      <div *ngFor="let rest of carritoSvc.restaurantes()">
+        <div class="rest-label">🏪 {{ rest.nombre }}</div>
+
+        <div class="carrito-item" *ngFor="let item of carritoSvc.items()">
+          <ng-container *ngIf="item.id_restaurante === rest.id">
+            <div class="item-img" [style.backgroundImage]="item.imagen_url ? 'url(' + item.imagen_url + ')' : ''">
+              <span *ngIf="!item.imagen_url">🍽</span>
+            </div>
+            <div class="item-info">
+              <div class="item-nombre">{{ item.nombre }}</div>
+              <div class="item-precio">${{ item.precio | number:'1.0-0' }}</div>
+            </div>
+            <div class="item-controles">
+              <button class="btn-ctrl" (click)="carritoSvc.reducir(item.id_producto)">−</button>
+              <span class="item-cantidad">{{ item.cantidad }}</span>
+              <button class="btn-ctrl" (click)="carritoSvc.agregar({id_producto: item.id_producto, nombre: item.nombre, precio: item.precio, imagen_url: item.imagen_url, id_restaurante: item.id_restaurante, nombre_restaurante: item.nombre_restaurante})">+</button>
+            </div>
+          </ng-container>
+        </div>
+      </div>
+
+      <div class="panel-total">
+        <span>Total</span>
+        <span class="total-valor">${{ carritoSvc.total() | number:'1.0-0' }}</span>
+      </div>
+
+      <button class="btn-pagar" (click)="irAPago()">Continuar al pago →</button>
+    </div>
+  </div>
+
+  <!-- ════ PASO: PAGO ════ -->
+  <div *ngIf="paso === 'pago'">
+    <div class="panel-header">
+      <button class="btn-volver" (click)="paso = 'carrito'">← Volver</button>
+      <h2>Método de pago</h2>
+      <button class="btn-cerrar" (click)="cerrar()">✕</button>
+    </div>
+
+    <div class="metodos-lista">
+      <div class="metodo-opcion"
+        *ngFor="let m of metodos"
+        [class.seleccionado]="metodoPago === m.valor"
+        (click)="seleccionarMetodo(m.valor)">
+        <span class="metodo-icono">{{ m.icono }}</span>
+        <div class="metodo-info">
+          <div class="metodo-label">{{ m.label }}</div>
+          <div class="metodo-desc">{{ m.desc }}</div>
+        </div>
+        <span class="metodo-check" *ngIf="metodoPago === m.valor">✓</span>
+      </div>
+    </div>
+
+    <div class="resumen-pago">
+      <div class="resumen-row" *ngFor="let item of carritoSvc.items()">
+        <span>{{ item.nombre }} x{{ item.cantidad }}</span>
+        <span>${{ item.precio * item.cantidad | number:'1.0-0' }}</span>
+      </div>
+      <div class="resumen-total">
+        <span>Total</span>
+        <span>${{ carritoSvc.total() | number:'1.0-0' }}</span>
+      </div>
+    </div>
+
+    <p class="panel-error" *ngIf="error">{{ error }}</p>
+
+    <button class="btn-pagar" (click)="confirmarPedido()" [disabled]="procesando || !metodoPago">
+      <span *ngIf="!procesando">✓ Confirmar pedido</span>
+      <span *ngIf="procesando" class="spinner"></span>
+    </button>
+  </div>
+
+  <!-- ════ PASO: CONFIRMADO ════ -->
+  <div *ngIf="paso === 'confirmado'" class="confirmado">
+    <div class="confirmado-icon">🎉</div>
+    <h2>¡Pedido recibido!</h2>
+
+    <div *ngFor="let pedido of transaccionConfirmada?.pedidos" class="pedido-confirmado">
+      <div class="pedido-orden">{{ pedido.numero_orden }}</div>
+      <div class="pedido-rest">{{ pedido.nombre_restaurante }}</div>
+
+      <div class="pedido-estado" [class.efectivo]="pedido.metodo_pago === 'efectivo'">
+        <span *ngIf="pedido.metodo_pago === 'efectivo'">
+          💵 Dirígete al mostrador de <strong>{{ pedido.nombre_restaurante }}</strong>
+          y muestra el código <strong>{{ pedido.numero_orden }}</strong> para pagar.
+        </span>
+        <span *ngIf="pedido.metodo_pago !== 'efectivo'">
+          🍳 Tu pedido está <strong>en preparación</strong>. Te avisarán cuando esté listo.
+        </span>
+      </div>
+
+      <div class="pedido-items">
+        <div class="pedido-item" *ngFor="let d of pedido.detalles">
+          {{ d.nombre_producto }} × {{ d.cantidad }}
+          <span>${{ d.precio_unitario * d.cantidad | number:'1.0-0' }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="confirmado-total">
+      Total pagado: <strong>${{ transaccionConfirmada?.total | number:'1.0-0' }}</strong>
+    </div>
+
+    <button class="btn-pagar" (click)="nuevoPedido()">Volver al inicio</button>
+  </div>
+
+</div>
