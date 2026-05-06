@@ -1,0 +1,297 @@
+<div class="loading-screen" *ngIf="loading"><div class="loader-ring"></div><p>Cargando tu panel...</p></div>
+<div class="error-screen" *ngIf="!loading && error"><p>{{ error }}</p><button class="btn-primary" (click)="cargarPerfil()">Reintentar</button></div>
+
+<div class="dashboard" *ngIf="!loading && !error && perfil">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-icon">🍽️</div>
+      <div class="brand-info">
+        <span class="brand-name">{{ perfil.nombre }}</span>
+        <span class="brand-id">{{ perfil.id_comercial }}</span>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <button class="nav-item" [class.active]="vistaActiva==='dashboard'" (click)="cambiarVista('dashboard')"><span class="nav-icon">📊</span> Mi Panel</button>
+      <button class="nav-item" [class.active]="vistaActiva==='pedidos'" (click)="cambiarVista('pedidos')"><span class="nav-icon">🔔</span> Pedidos Activos</button>
+      <button class="nav-item" [class.active]="vistaActiva==='verificador'" (click)="cambiarVista('verificador')"><span class="nav-icon">🔍</span> Verificar Orden</button>
+      <button class="nav-item" [class.active]="vistaActiva==='historial'" (click)="cambiarVista('historial')"><span class="nav-icon">📋</span> Historial</button>
+      <button class="nav-item" [class.active]="vistaActiva==='vista-cliente'" (click)="cambiarVista('vista-cliente')"><span class="nav-icon">👁️</span> Vista Cliente</button>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="rating-badge"><span class="star">★</span><span>{{ perfil.calificacion_promedio | number:'1.1-1' }}</span></div>
+      <button class="btn-logout" (click)="logout()">Cerrar sesión</button>
+    </div>
+  </aside>
+
+  <main class="main-content">
+
+    <!-- ════ DASHBOARD ════ -->
+    <div *ngIf="vistaActiva==='dashboard'">
+      <div class="profile-header">
+        <div class="profile-banner" [style.backgroundImage]="(bannerPreview||perfil.imagen_url)?'url('+(bannerPreview||perfil.imagen_url)+')':''">
+          <div class="banner-overlay">
+            <div class="banner-actions" *ngIf="!bannerPreview">
+              <label class="btn-banner-upload" for="bannerInput">📷 {{ perfil.imagen_url?'Cambiar':'Agregar imagen' }}</label>
+              <input id="bannerInput" type="file" accept="image/*" style="display:none" (change)="onBannerSeleccionado($event)">
+            </div>
+            <div class="banner-confirm" *ngIf="bannerPreview">
+              <button class="btn-confirm" (click)="subirBanner()" [disabled]="subiendoBanner">{{ subiendoBanner?'Subiendo...':'✓ Guardar' }}</button>
+              <button class="btn-cancel-banner" (click)="cancelarBanner()">✕</button>
+            </div>
+          </div>
+        </div>
+        <div class="profile-info">
+          <div class="profile-avatar">{{ perfil.nombre[0] }}</div>
+          <div class="profile-details">
+            <div class="profile-name-row"><h1>{{ perfil.nombre }}</h1><button class="btn-icon" (click)="abrirModal('editarNombre')">✏️</button></div>
+            <p class="profile-desc">{{ perfil.descripcion||'Sin descripción.' }}</p>
+            <p class="profile-horario" *ngIf="perfil.horario">🕐 {{ perfil.horario }}</p>
+          </div>
+          <button class="btn-secondary" (click)="abrirModal('editarInfo')">Editar info</button>
+        </div>
+      </div>
+
+      <div class="stats-row">
+        <div class="stat-card"><span class="stat-num">{{ menus.length }}</span><span class="stat-label">Menús</span></div>
+        <div class="stat-card"><span class="stat-num">{{ perfil.calificacion_promedio | number:'1.1-1' }}</span><span class="stat-label">Calificación ★</span></div>
+        <div class="stat-card"><span class="stat-num" [class.activo]="perfil.estado">{{ perfil.estado?'Activo':'Pendiente' }}</span><span class="stat-label">Estado</span></div>
+      </div>
+
+      <div class="section-header"><h2>Mis Menús</h2><button class="btn-primary" (click)="abrirModal('nuevoMenu')">+ Nuevo menú</button></div>
+
+      <div class="menus-list" *ngIf="menus.length>0">
+        <div class="menu-card" *ngFor="let menu of menus">
+          <div class="menu-card-header" (click)="toggleMenu(menu.id_menu)">
+            <div class="menu-title-row">
+              <span class="menu-chevron" [class.open]="menuExpandido===menu.id_menu">›</span>
+              <span class="menu-name">{{ menu.nombre_menu }}</span>
+              <span class="menu-count" *ngIf="productosCache[menu.id_menu]">{{ productosCache[menu.id_menu].length }} platos</span>
+            </div>
+            <div class="menu-actions" (click)="$event.stopPropagation()">
+              <button class="btn-sm btn-add" (click)="abrirNuevoProducto(menu.id_menu)">+ Plato</button>
+              <button class="btn-sm btn-delete" (click)="eliminarMenu(menu.id_menu)">🗑</button>
+            </div>
+          </div>
+          <div class="productos-list" *ngIf="menuExpandido===menu.id_menu">
+            <div class="empty-productos" *ngIf="!productosCache[menu.id_menu]||productosCache[menu.id_menu].length===0">Sin platos. <button class="link-btn" (click)="abrirNuevoProducto(menu.id_menu)">Agregar</button></div>
+            <div class="producto-row" *ngFor="let p of productosCache[menu.id_menu]">
+              <div class="producto-thumb" [style.backgroundImage]="p.imagen_url?'url('+p.imagen_url+')':''"><span *ngIf="!p.imagen_url">🍽</span></div>
+              <div class="producto-info"><span class="producto-nombre" [class.agotado]="p.disponible===0">{{ p.nombre }}</span><span class="producto-desc" *ngIf="p.descripcion">{{ p.descripcion }}</span></div>
+              <div class="producto-actions">
+                <span class="producto-precio">${{ p.precio | number:'1.0-0' }}</span>
+                <label class="toggle-switch"><input type="checkbox" [checked]="p.disponible===1" (change)="toggleDisponibilidad(p)"><span class="toggle-slider"></span></label>
+                <button class="btn-sm btn-edit" (click)="abrirEditarProducto(p)">✏️</button>
+                <button class="btn-sm btn-delete" (click)="eliminarProducto(p)">🗑</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="empty-menus" *ngIf="menus.length===0"><p>No tienes menús todavía.</p><button class="btn-primary" (click)="abrirModal('nuevoMenu')">Crear mi primer menú</button></div>
+    </div>
+
+    <!-- ════ PEDIDOS ACTIVOS ════ -->
+    <div *ngIf="vistaActiva==='pedidos'">
+      <div class="page-header">
+        <h2>Pedidos Activos</h2>
+        <div class="polling-dot" title="Actualizando cada 6s"></div>
+      </div>
+
+      <div class="pedidos-cols">
+        <!-- Columna: En espera de pago -->
+        <div class="pedidos-col">
+          <div class="col-title espera">⏳ Pendiente de pago</div>
+          <div class="empty-col" *ngIf="!pedidosActivos || pedidosActivos.length === 0 || (pedidosActivos | filtroEstado:1).length === 0">Sin pedidos</div>
+          <div class="pedido-card" *ngFor="let p of pedidosActivos | filtroEstado:1" [class.nuevo]="p._nuevo">
+            <div class="pedido-top">
+              <span class="pedido-orden">{{ p.numero_orden }}</span>
+              <span class="pedido-hora">{{ p.fecha | date:'HH:mm' }}</span>
+            </div>
+            <div class="pedido-items">
+              <div class="pedido-item-row" *ngFor="let d of p.detalles">{{ d.nombre_producto }} × {{ d.cantidad }}</div>
+            </div>
+            <div class="pedido-total">${{ p.total | number:'1.0-0' }}</div>
+            <div class="pedido-metodo efectivo">💵 Efectivo — debe pagar en caja</div>
+            <div class="pedido-acciones">
+              <button class="btn-accion confirmar" (click)="actualizarEstado(p.id_pedido, 2)">✓ Pago recibido — Preparar</button>
+              <button class="btn-accion cancelar" (click)="actualizarEstado(p.id_pedido, 5)">✕ Cancelar</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Columna: En preparación -->
+        <div class="pedidos-col">
+          <div class="col-title preparando">🍳 En preparación</div>
+          <div class="empty-col" *ngIf="!pedidosActivos || (pedidosActivos | filtroEstado:2).length === 0">Sin pedidos</div>
+          <div class="pedido-card" *ngFor="let p of pedidosActivos | filtroEstado:2" [class.nuevo]="p._nuevo">
+            <div class="pedido-top">
+              <span class="pedido-orden">{{ p.numero_orden }}</span>
+              <span class="pedido-hora">{{ p.fecha | date:'HH:mm' }}</span>
+            </div>
+            <div class="pedido-items">
+              <div class="pedido-item-row" *ngFor="let d of p.detalles">{{ d.nombre_producto }} × {{ d.cantidad }}</div>
+            </div>
+            <div class="pedido-total">${{ p.total | number:'1.0-0' }}</div>
+            <div class="pedido-metodo digital">{{ p.metodo_pago === 'efectivo' ? '💵' : '💳' }} {{ p.metodo_pago }}</div>
+            <div class="pedido-acciones">
+              <button class="btn-accion listo" (click)="actualizarEstado(p.id_pedido, 3)">🔔 Marcar como listo</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════ VERIFICADOR ════ -->
+    <div *ngIf="vistaActiva==='verificador'" class="verificador">
+      <div class="page-header"><h2>Verificar Orden</h2></div>
+      <p class="verificador-hint">El cliente muestra su código de orden en el celular. Ingrésalo aquí para confirmar y procesar el pago.</p>
+
+      <div class="verificador-input">
+        <input type="text" [(ngModel)]="codigoVerificador" placeholder="Ej: ORD-0042" (keyup.enter)="verificarOrden()" [style.text-transform]="'uppercase'">
+        <button class="btn-primary" (click)="verificarOrden()" [disabled]="buscandoOrden">
+          {{ buscandoOrden ? 'Buscando...' : 'Verificar' }}
+        </button>
+      </div>
+
+      <div class="verificador-error" *ngIf="errorVerificador">⚠️ {{ errorVerificador }}</div>
+
+      <div class="verificador-resultado" *ngIf="resultadoVerificador">
+        <div class="vr-orden">{{ resultadoVerificador.numero_orden }}</div>
+        <div class="vr-estado" [style.color]="estadoInfo(resultadoVerificador.estado).color">
+          {{ estadoInfo(resultadoVerificador.estado).texto }}
+        </div>
+        <div class="vr-cliente">📱 Cliente: {{ resultadoVerificador.telefono_cliente }}</div>
+        <div class="vr-items">
+          <div class="vr-item" *ngFor="let d of resultadoVerificador.detalles">
+            {{ d.nombre_producto }} × {{ d.cantidad }}
+            <span>${{ d.precio_unitario * d.cantidad | number:'1.0-0' }}</span>
+          </div>
+        </div>
+        <div class="vr-total">Total: <strong>${{ resultadoVerificador.total | number:'1.0-0' }}</strong></div>
+        <div class="vr-metodo">Método: <strong>{{ resultadoVerificador.metodo_pago }}</strong></div>
+
+        <button class="btn-accion confirmar" *ngIf="resultadoVerificador.estado===1" (click)="confirmarPagoEfectivo(resultadoVerificador.id_pedido)">
+          ✓ Confirmar pago en efectivo
+        </button>
+        <div class="vr-ok" *ngIf="resultadoVerificador.estado===2">✓ Pago confirmado — en preparación</div>
+        <div class="vr-ok verde" *ngIf="resultadoVerificador.estado===3">✓ Pedido listo para recoger</div>
+      </div>
+    </div>
+
+    <!-- ════ HISTORIAL ════ -->
+    <div *ngIf="vistaActiva==='historial'" class="historial">
+      <div class="page-header">
+        <h2>Historial de Ventas</h2>
+        <div class="historial-total" *ngIf="!loadingHistorial">Total entregado: <strong>${{ totalHistorial() | number:'1.0-0' }}</strong></div>
+      </div>
+
+      <div class="loading-wrap" *ngIf="loadingHistorial"><div class="loader-ring"></div></div>
+
+      <div class="empty-wrap" *ngIf="!loadingHistorial && historial.length===0"><p>No hay pedidos en el historial aún.</p></div>
+
+      <div class="historial-tabla" *ngIf="!loadingHistorial && historial.length>0">
+        <div class="tabla-header">
+          <span>Orden</span><span>Fecha</span><span>Método</span><span>Total</span><span>Estado</span>
+        </div>
+        <div class="tabla-row" *ngFor="let p of historial">
+          <span class="orden-num">{{ p.numero_orden }}</span>
+          <span>{{ p.fecha | date:'dd/MM HH:mm' }}</span>
+          <span>{{ p.metodo_pago }}</span>
+          <span>${{ p.total | number:'1.0-0' }}</span>
+          <span class="estado-chip" [style.color]="estadoInfo(p.estado).color" [style.background]="estadoInfo(p.estado).bg">
+            {{ estadoInfo(p.estado).texto }}
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════ VISTA CLIENTE ════ -->
+    <div *ngIf="vistaActiva==='vista-cliente'" class="vista-cliente">
+      <div class="vc-header" [style.backgroundImage]="perfil.imagen_url?'url('+perfil.imagen_url+')':''">
+        <div class="vc-header-overlay">
+          <h2>{{ perfil.nombre }}</h2>
+          <p>{{ perfil.descripcion }}</p>
+          <div class="menu-hero-meta"><span *ngIf="perfil.horario">🕐 {{ perfil.horario }}</span><span>⭐ {{ perfil.calificacion_promedio|number:'1.1-1' }}</span></div>
+        </div>
+      </div>
+      <div *ngFor="let menu of menus" class="vc-menu">
+        <h3 class="vc-menu-title">{{ menu.nombre_menu }}</h3>
+        <div class="vc-grid">
+          <ng-container *ngIf="productosCache[menu.id_menu]">
+            <div class="vc-card" *ngFor="let p of productosCache[menu.id_menu]" [class.vc-agotado]="p.disponible===0">
+              <div class="vc-img" [style.backgroundImage]="p.imagen_url?'url('+p.imagen_url+')':''"><span *ngIf="!p.imagen_url" class="vc-no-img">🍽</span></div>
+              <div class="vc-card-body"><span class="vc-nombre">{{ p.nombre }}</span><span class="vc-desc" *ngIf="p.descripcion">{{ p.descripcion }}</span></div>
+              <div class="vc-card-foot"><span class="vc-precio">${{ p.precio|number:'1.0-0' }}</span><span class="vc-badge" *ngIf="p.disponible===0">Agotado</span></div>
+            </div>
+          </ng-container>
+          <p class="vc-loading" *ngIf="!productosCache[menu.id_menu]" (click)="toggleMenu(menu.id_menu)">Cargar platos →</p>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- MODALES -->
+<div class="modal-overlay" *ngIf="modalActivo!=='none'" (click)="cerrarModal()">
+  <div class="modal" (click)="$event.stopPropagation()">
+
+    <ng-container *ngIf="modalActivo==='editarInfo'">
+      <h3>Editar información</h3>
+      <form [formGroup]="infoForm" class="modal-form">
+        <div class="form-group"><label>Descripción</label><input type="text" formControlName="descripcion"></div>
+        <div class="form-group"><label>Horario</label><input type="text" formControlName="horario" placeholder="10:00 AM - 9:00 PM"></div>
+      </form>
+      <p class="modal-error" *ngIf="modalError">{{ modalError }}</p>
+      <div class="modal-btns"><button class="btn-secondary" (click)="cerrarModal()">Cancelar</button><button class="btn-primary" (click)="guardarInfo()" [disabled]="modalGuardando">{{ modalGuardando?'Guardando...':'Guardar' }}</button></div>
+    </ng-container>
+
+    <ng-container *ngIf="modalActivo==='editarNombre'">
+      <h3>Cambiar nombre</h3>
+      <p class="modal-hint">Confirma tu identidad para cambiar el nombre.</p>
+      <form [formGroup]="nombreForm" class="modal-form">
+        <div class="form-group"><label>Nuevo nombre</label><input type="text" formControlName="nombre"></div>
+        <div class="form-group"><label>Tu ID Comercial</label><input type="text" formControlName="id_comercial"></div>
+        <div class="form-group"><label>Tu Contraseña</label><input type="password" formControlName="contrasena"></div>
+      </form>
+      <p class="modal-error" *ngIf="modalError">{{ modalError }}</p>
+      <div class="modal-btns"><button class="btn-secondary" (click)="cerrarModal()">Cancelar</button><button class="btn-primary" (click)="guardarNombre()" [disabled]="modalGuardando">{{ modalGuardando?'Verificando...':'Confirmar' }}</button></div>
+    </ng-container>
+
+    <ng-container *ngIf="modalActivo==='nuevoMenu'">
+      <h3>Nuevo menú</h3>
+      <form [formGroup]="menuForm" class="modal-form">
+        <div class="form-group"><label>Nombre del menú</label><input type="text" formControlName="nombre_menu" placeholder="Ej: Menú del Día"></div>
+      </form>
+      <p class="modal-error" *ngIf="modalError">{{ modalError }}</p>
+      <div class="modal-btns"><button class="btn-secondary" (click)="cerrarModal()">Cancelar</button><button class="btn-primary" (click)="crearMenu()" [disabled]="modalGuardando">{{ modalGuardando?'Creando...':'Crear' }}</button></div>
+    </ng-container>
+
+    <ng-container *ngIf="modalActivo==='nuevoProducto'||modalActivo==='editarProducto'">
+      <h3>{{ modalActivo==='nuevoProducto'?'Nuevo plato':'Editar plato' }}</h3>
+      <form [formGroup]="productoForm" class="modal-form">
+        <div class="form-group"><label>Nombre</label><input type="text" formControlName="nombre"></div>
+        <div class="form-group"><label>Descripción</label><input type="text" formControlName="descripcion"></div>
+        <div class="form-group"><label>Precio</label><input type="number" formControlName="precio"></div>
+        <div class="form-group">
+          <label>Foto del plato</label>
+          <div class="img-upload-area">
+            <div class="img-preview" *ngIf="productoImagenPreview" [style.backgroundImage]="'url('+productoImagenPreview+')'"></div>
+            <div class="img-placeholder" *ngIf="!productoImagenPreview">🍽</div>
+            <label class="btn-img-upload" for="productoImgInput">{{ productoImagenPreview?'Cambiar':'+ Foto' }}</label>
+            <input id="productoImgInput" type="file" accept="image/*" style="display:none" (change)="onProductoImagenSeleccionada($event)">
+          </div>
+        </div>
+        <div class="form-group toggle-group">
+          <label>Disponible</label>
+          <label class="toggle-switch"><input type="checkbox" [checked]="productoForm.get('disponible')?.value===1" (change)="productoForm.patchValue({disponible:$any($event.target).checked?1:0})"><span class="toggle-slider"></span></label>
+        </div>
+      </form>
+      <p class="modal-error" *ngIf="modalError">{{ modalError }}</p>
+      <div class="modal-btns"><button class="btn-secondary" (click)="cerrarModal()">Cancelar</button><button class="btn-primary" (click)="guardarProducto()" [disabled]="modalGuardando">{{ modalGuardando?'Guardando...':(modalActivo==='nuevoProducto'?'Agregar':'Guardar') }}</button></div>
+    </ng-container>
+
+  </div>
+</div>

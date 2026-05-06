@@ -1,0 +1,120 @@
+<div class="login-wrapper">
+  <div class="login-container">
+
+    <!-- Estado: éxito -->
+    <div *ngIf="success" class="success-box">
+      <div class="success-icon">✓</div>
+      <h2>¡Solicitud enviada!</h2>
+      <p>Tu restaurante ha sido registrado y está <strong>pendiente de activación</strong>.</p>
+      <p>El administrador del parque comercial revisará tu solicitud y te notificará cuando esté activo.</p>
+      <button class="submit-btn" style="margin-top: 1.5rem;" routerLink="/login-restaurant">
+        Ir al acceso de restaurante
+      </button>
+    </div>
+
+    <!-- Formulario -->
+    <div *ngIf="!success">
+      <div class="login-header">
+        <h2>Registrar Restaurante</h2>
+        <p>Completa el formulario. Tu cuenta quedará pendiente de aprobación.</p>
+      </div>
+
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" class="login-form">
+
+        <div class="form-group">
+          <label for="id_comercial">ID Comercial</label>
+          <input
+            type="text"
+            id="id_comercial"
+            formControlName="id_comercial"
+            placeholder="Ej: PizzasDonJuan2026"
+            [class.is-invalid]="form.get('id_comercial')?.invalid && form.get('id_comercial')?.touched"
+          />
+          <small class="hint">Solo letras, números, guiones y guiones bajos. Este será tu usuario de acceso.</small>
+          <div class="error-message" *ngIf="form.get('id_comercial')?.invalid && form.get('id_comercial')?.touched">
+            <span *ngIf="form.get('id_comercial')?.errors?.['required']">El ID comercial es requerido.</span>
+            <span *ngIf="form.get('id_comercial')?.errors?.['minlength']">Mínimo 4 caracteres.</span>
+            <span *ngIf="form.get('id_comercial')?.errors?.['pattern']">Solo letras, números, - y _.</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="nombre">Nombre del Restaurante</label>
+          <input
+            type="text"
+            id="nombre"
+            formControlName="nombre"
+            placeholder="Ej: Pizzas Don Juan"
+            [class.is-invalid]="form.get('nombre')?.invalid && form.get('nombre')?.touched"
+          />
+          <div class="error-message" *ngIf="form.get('nombre')?.invalid && form.get('nombre')?.touched">
+            <span *ngIf="form.get('nombre')?.errors?.['required']">El nombre es requerido.</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="descripcion">Descripción (opcional)</label>
+          <input
+            type="text"
+            id="descripcion"
+            formControlName="descripcion"
+            placeholder="Ej: Comida italiana artesanal"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="horario">Horario (opcional)</label>
+          <input
+            type="text"
+            id="horario"
+            formControlName="horario"
+            placeholder="Ej: 10:00 AM - 9:00 PM"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="contrasena">Contraseña</label>
+          <input
+            type="password"
+            id="contrasena"
+            formControlName="contrasena"
+            placeholder="••••••••"
+            [class.is-invalid]="form.get('contrasena')?.invalid && form.get('contrasena')?.touched"
+          />
+          <div class="error-message" *ngIf="form.get('contrasena')?.invalid && form.get('contrasena')?.touched">
+            <span *ngIf="form.get('contrasena')?.errors?.['required']">La contraseña es requerida.</span>
+            <span *ngIf="form.get('contrasena')?.errors?.['minlength']">Mínimo 6 caracteres.</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="confirmar">Confirmar Contraseña</label>
+          <input
+            type="password"
+            id="confirmar"
+            formControlName="confirmar"
+            placeholder="••••••••"
+            [class.is-invalid]="form.get('confirmar')?.touched && form.errors?.['noCoinciden']"
+          />
+          <div class="error-message" *ngIf="form.get('confirmar')?.touched && form.errors?.['noCoinciden']">
+            Las contraseñas no coinciden.
+          </div>
+        </div>
+
+        <div class="error-message" *ngIf="error" style="margin-bottom: 10px; font-weight: bold; text-align: center;">
+          {{ error }}
+        </div>
+
+        <button type="submit" class="submit-btn" [disabled]="isSubmitting">
+          <span *ngIf="!isSubmitting">Enviar Solicitud</span>
+          <span *ngIf="isSubmitting" class="spinner"></span>
+        </button>
+      </form>
+
+      <div class="login-footer">
+        <p>¿Ya tienes acceso? <a routerLink="/login-restaurant">Iniciar sesión</a></p>
+      </div>
+    </div>
+
+  </div>
+</div>

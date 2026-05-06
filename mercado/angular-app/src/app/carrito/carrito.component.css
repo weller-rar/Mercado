@@ -1,0 +1,108 @@
+/* ── FAB ── */
+.fab-carrito {
+  position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 200;
+  width: 56px; height: 56px; border-radius: 50%;
+  background: #2c2a26; color: white; border: none;
+  font-size: 1.4rem; cursor: pointer; box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+  transition: transform 0.2s, background 0.2s;
+  display: flex; align-items: center; justify-content: center;
+  position: fixed;
+}
+.fab-carrito:hover { transform: scale(1.08); background: #3e3b35; }
+.fab-carrito.tiene-items { background: #6b7c4a; }
+.fab-badge {
+  position: absolute; top: -4px; right: -4px;
+  background: #e53e3e; color: white; font-size: 0.7rem; font-weight: 700;
+  width: 20px; height: 20px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  border: 2px solid white;
+}
+
+/* ── Overlay ── */
+.carrito-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.4);
+  z-index: 300; backdrop-filter: blur(2px);
+  animation: fadeIn 0.15s ease;
+}
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+/* ── Panel ── */
+.carrito-panel {
+  position: fixed; top: 0; right: -420px; height: 100vh; width: 100%; max-width: 420px;
+  background: white; z-index: 400; box-shadow: -8px 0 32px rgba(0,0,0,0.15);
+  transition: right 0.3s cubic-bezier(0.4,0,0.2,1);
+  display: flex; flex-direction: column; overflow-y: auto;
+}
+.carrito-panel.abierto { right: 0; }
+
+/* ── Header ── */
+.panel-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 1.25rem 1.5rem; border-bottom: 1px solid #f0ede8; flex-shrink: 0;
+}
+.panel-header h2 { font-size: 1.1rem; font-weight: 700; color: #2c2a26; margin: 0; }
+.btn-cerrar { background: none; border: none; font-size: 1.1rem; cursor: pointer; color: #9e9a93; padding: 4px; }
+.btn-volver { background: none; border: none; font-size: 0.85rem; cursor: pointer; color: #6b7c4a; font-weight: 600; }
+
+/* ── Empty ── */
+.panel-empty { display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; gap: 0.75rem; padding: 3rem; color: #9e9a93; text-align: center; }
+.empty-icon { font-size: 3rem; }
+
+/* ── Items ── */
+.panel-items { padding: 1rem 1.5rem; display: flex; flex-direction: column; gap: 0.5rem; flex: 1; }
+.rest-label { font-size: 0.75rem; font-weight: 700; color: #9e9a93; text-transform: uppercase; letter-spacing: 0.05em; margin: 0.75rem 0 0.25rem; }
+
+.carrito-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem; background: #fafaf8; border-radius: 10px; }
+.item-img { width: 44px; height: 44px; border-radius: 8px; background: #f0ede8; background-size: cover; background-position: center; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0; }
+.item-info { flex: 1; }
+.item-nombre { font-size: 0.875rem; font-weight: 600; color: #2c2a26; }
+.item-precio { font-size: 0.8rem; color: #6b7c4a; font-weight: 700; }
+
+.item-controles { display: flex; align-items: center; gap: 0.5rem; }
+.btn-ctrl { width: 28px; height: 28px; border-radius: 50%; border: 1.5px solid #e0dbd3; background: white; font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
+.btn-ctrl:hover { background: #6b7c4a; color: white; border-color: #6b7c4a; }
+.item-cantidad { font-weight: 700; color: #2c2a26; min-width: 20px; text-align: center; }
+
+.panel-total { display: flex; justify-content: space-between; align-items: center; padding: 1rem 0; border-top: 1px solid #f0ede8; margin-top: 0.5rem; font-size: 0.9rem; color: #7a7068; }
+.total-valor { font-size: 1.2rem; font-weight: 800; color: #2c2a26; }
+
+/* ── Métodos de pago ── */
+.metodos-lista { padding: 1rem 1.5rem; display: flex; flex-direction: column; gap: 0.5rem; }
+.metodo-opcion { display: flex; align-items: center; gap: 0.875rem; padding: 0.875rem; border: 1.5px solid #e0dbd3; border-radius: 12px; cursor: pointer; transition: all 0.15s; }
+.metodo-opcion:hover { border-color: #6b7c4a; background: #f8faf5; }
+.metodo-opcion.seleccionado { border-color: #6b7c4a; background: #f0f5e8; }
+.metodo-icono { font-size: 1.4rem; flex-shrink: 0; }
+.metodo-info { flex: 1; }
+.metodo-label { font-weight: 600; color: #2c2a26; font-size: 0.9rem; }
+.metodo-desc { font-size: 0.75rem; color: #9e9a93; margin-top: 2px; }
+.metodo-check { color: #6b7c4a; font-weight: 700; font-size: 1rem; }
+
+.resumen-pago { margin: 0 1.5rem; padding: 1rem; background: #fafaf8; border-radius: 10px; display: flex; flex-direction: column; gap: 0.4rem; }
+.resumen-row { display: flex; justify-content: space-between; font-size: 0.8rem; color: #7a7068; }
+.resumen-total { display: flex; justify-content: space-between; font-weight: 700; color: #2c2a26; font-size: 0.95rem; padding-top: 0.5rem; border-top: 1px solid #e0dbd3; margin-top: 0.25rem; }
+
+/* ── Botón pagar ── */
+.btn-pagar { margin: 1rem 1.5rem; padding: 0.875rem; background: #6b7c4a; color: white; border: none; border-radius: 10px; font-size: 0.95rem; font-weight: 700; cursor: pointer; transition: background 0.2s; width: calc(100% - 3rem); display: flex; align-items: center; justify-content: center; }
+.btn-pagar:hover:not([disabled]) { background: #5a6a3b; }
+.btn-pagar[disabled] { background: #a0a0a0; cursor: not-allowed; }
+
+.panel-error { color: #c53030; font-size: 0.8rem; text-align: center; margin: 0 1.5rem; font-weight: 500; }
+
+.spinner { width: 18px; height: 18px; border: 2px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── Confirmado ── */
+.confirmado { padding: 2rem 1.5rem; display: flex; flex-direction: column; gap: 1rem; }
+.confirmado-icon { font-size: 3rem; text-align: center; }
+.confirmado h2 { text-align: center; font-size: 1.3rem; font-weight: 700; color: #2c2a26; margin: 0; }
+
+.pedido-confirmado { background: #f5f3ef; border-radius: 12px; padding: 1rem; display: flex; flex-direction: column; gap: 0.5rem; }
+.pedido-orden { font-size: 1.1rem; font-weight: 800; color: #6b7c4a; }
+.pedido-rest { font-size: 0.8rem; color: #9e9a93; }
+.pedido-estado { font-size: 0.85rem; color: #2c2a26; background: white; padding: 0.75rem; border-radius: 8px; line-height: 1.5; }
+.pedido-estado.efectivo { border-left: 3px solid #f6ad55; }
+.pedido-items { display: flex; flex-direction: column; gap: 0.25rem; }
+.pedido-item { display: flex; justify-content: space-between; font-size: 0.8rem; color: #7a7068; }
+
+.confirmado-total { text-align: center; font-size: 0.95rem; color: #7a7068; }
+.confirmado-total strong { color: #2c2a26; font-size: 1.1rem; }

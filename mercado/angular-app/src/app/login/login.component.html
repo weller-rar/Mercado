@@ -1,0 +1,36 @@
+<div class="login-wrapper">
+  <div class="login-container">
+    <div class="login-header">
+      <h2>Bienvenido</h2>
+      <p>Ingresa tu teléfono para continuar</p>
+    </div>
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
+      <div class="form-group">
+        <label for="telefono">Número de teléfono</label>
+        <input
+          type="text"
+          id="telefono"
+          formControlName="telefono"
+          placeholder="Ej: 3001234567"
+          [class.is-invalid]="loginForm.get('telefono')?.invalid && loginForm.get('telefono')?.touched"
+        />
+        <div class="error-message" *ngIf="loginForm.get('telefono')?.invalid && loginForm.get('telefono')?.touched">
+          <span *ngIf="loginForm.get('telefono')?.errors?.['required']">El teléfono es requerido.</span>
+        </div>
+      </div>
+
+      <div class="error-message" *ngIf="loginError" style="margin-bottom: 10px; font-weight: bold; text-align: center;">
+        {{ loginError }}
+      </div>
+
+      <button type="submit" class="submit-btn" [disabled]="isSubmitting">
+        <span *ngIf="!isSubmitting">Ingresar</span>
+        <span *ngIf="isSubmitting" class="spinner"></span>
+      </button>
+    </form>
+
+    <div class="login-footer">
+      <p>¿Eres un establecimiento? <a routerLink="/login-restaurant">Accede aquí</a></p>
+    </div>
+  </div>
+</div>
