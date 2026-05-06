@@ -1,13 +1,11 @@
 import { Injectable, PLATFORM_ID, Inject } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
-import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
 
 const BASE_URL = 'http://localhost:8000';
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({ providedIn: 'root' })
 export class AuthService {
 
   constructor(
@@ -15,28 +13,64 @@ export class AuthService {
     @Inject(PLATFORM_ID) private platformId: Object
   ) {}
 
-  // ── Login cliente: solo teléfono ──────────────────────────────────────────
+  private isBrowser(): boolean {
+    return isPlatformBrowser(this.platformId);
+  }
+
+  // ── sessionStorage para cliente (por pestaña, no se comparte) ─────────────
+  private setSession(key: string, value: string): void {
+    if (this.isBrowser()) sessionStorage.setItem(key, value);
+  }
+
+  private getSession(key: string): string | null {
+    return this.isBrowser() ? sessionStorage.getItem(key) : null;
+  }
+
+  private removeSession(key: string): void {
+    if (this.isBrowser()) sessionStorage.removeItem(key);
+  }
+
+  // ── localStorage solo para restaurante (una sola sesión de restaurante) ────
+  private setLocal(key: string, value: string): void {
+    if (this.isBrowser()) localStorage.setItem(key, value);
+  }
+
+  private getLocal(key: string): string | null {
+    return this.isBrowser() ? localStorage.getItem(key) : null;
+  }
+
+  private removeLocal(key: string): void {
+    if (this.isBrowser()) localStorage.removeItem(key);
+  }
+
+  // ── Login cliente ─────────────────────────────────────────────────────────
   loginInvitado(telefono: string): Observable<any> {
     return this.http.post(`${BASE_URL}/usuarios/login-invitado`, { telefono }).pipe(
       tap((response: any) => {
         if (response?.access_token) {
-          this.setUserSession(response.access_token, response.rol);
+          // Limpiar sesión de cliente anterior en esta pestaña
+          sessionStorage.clear();
+          this.setSession('token', response.access_token);
+          this.setSession('rol', response.rol);
+          this.setSession('telefono_cliente', telefono);
         }
       })
     );
   }
 
-  // ── Login restaurante: id_comercial + contraseña ──────────────────────────
+  // ── Login restaurante ─────────────────────────────────────────────────────
   loginRestaurante(id_comercial: string, contrasena: string): Observable<any> {
     return this.http.post(`${BASE_URL}/restaurantes/login`, { id_comercial, contrasena }).pipe(
       tap((response: any) => {
         if (response?.access_token) {
-          this.setRestauranteSession(
-            response.access_token,
-            response.id_restaurante,
-            response.id_comercial,
-            response.nombre,
-          );
+          this.removeLocal('restaurante_token');
+          this.removeLocal('restaurante_id');
+          this.removeLocal('restaurante_id_comercial');
+          this.removeLocal('restaurante_nombre');
+          this.setLocal('restaurante_token', response.access_token);
+          this.setLocal('restaurante_id', String(response.id_restaurante));
+          this.setLocal('restaurante_id_comercial', response.id_comercial);
+          this.setLocal('restaurante_nombre', response.nombre);
         }
       })
     );
@@ -46,66 +80,25 @@ export class AuthService {
     return this.http.get(`${BASE_URL}/restaurantes`);
   }
 
-  // ── Sesión usuario ────────────────────────────────────────────────────────
-  private setUserSession(token: string, rol: string): void {
-    if (isPlatformBrowser(this.platformId)) {
-      localStorage.setItem('token', token);
-      localStorage.setItem('rol', rol);
-      localStorage.removeItem('restaurante_token');
-      localStorage.removeItem('restaurante_id');
-      localStorage.removeItem('restaurante_nombre');
-    }
-  }
+  // ── Getters cliente (sessionStorage) ─────────────────────────────────────
+  getToken(): string | null { return this.getSession('token'); }
+  getRol(): string | null { return this.getSession('rol'); }
+  getTelefono(): string | null { return this.getSession('telefono_cliente'); }
 
-  // ── Sesión restaurante ────────────────────────────────────────────────────
-  private setRestauranteSession(token: string, id: number, idComercial: string, nombre: string): void {
-    if (isPlatformBrowser(this.platformId)) {
-      localStorage.setItem('restaurante_token', token);
-      localStorage.setItem('restaurante_id', String(id));
-      localStorage.setItem('restaurante_id_comercial', idComercial);
-      localStorage.setItem('restaurante_nombre', nombre);
-      localStorage.removeItem('token');
-      localStorage.removeItem('rol');
-    }
-  }
-
-  getToken(): string | null {
-    if (isPlatformBrowser(this.platformId)) return localStorage.getItem('token');
-    return null;
-  }
-
-  getRestauranteToken(): string | null {
-    if (isPlatformBrowser(this.platformId)) return localStorage.getItem('restaurante_token');
-    return null;
-  }
-
-  getRol(): string | null {
-    if (isPlatformBrowser(this.platformId)) return localStorage.getItem('rol');
-    return null;
-  }
-
-  getRestauranteNombre(): string | null {
-    if (isPlatformBrowser(this.platformId)) return localStorage.getItem('restaurante_nombre');
-    return null;
-  }
-
-  getRestauranteIdComercial(): string | null {
-    if (isPlatformBrowser(this.platformId)) return localStorage.getItem('restaurante_id_comercial');
-    return null;
-  }
+  // ── Getters restaurante (localStorage) ───────────────────────────────────
+  getRestauranteToken(): string | null { return this.getLocal('restaurante_token'); }
+  getRestauranteNombre(): string | null { return this.getLocal('restaurante_nombre'); }
+  getRestauranteIdComercial(): string | null { return this.getLocal('restaurante_id_comercial'); }
 
   isLoggedIn(): boolean { return !!this.getToken(); }
   isRestauranteLoggedIn(): boolean { return !!this.getRestauranteToken(); }
   isCliente(): boolean { return this.getRol() === 'cliente'; }
 
   logout(): void {
-    if (isPlatformBrowser(this.platformId)) {
-      localStorage.removeItem('token');
-      localStorage.removeItem('rol');
-      localStorage.removeItem('restaurante_token');
-      localStorage.removeItem('restaurante_id');
-      localStorage.removeItem('restaurante_id_comercial');
-      localStorage.removeItem('restaurante_nombre');
-    }
+    sessionStorage.clear();
+    this.removeLocal('restaurante_token');
+    this.removeLocal('restaurante_id');
+    this.removeLocal('restaurante_id_comercial');
+    this.removeLocal('restaurante_nombre');
   }
 }

@@ -1,0 +1,89 @@
+<!-- Botón perfil en header — reemplaza el 👤 -->
+<button class="btn-perfil" (click)="abrir()">
+  <div class="avatar-circle">{{ telefono ? telefono[0] : '👤' }}</div>
+</button>
+
+<!-- Overlay -->
+<div class="perfil-overlay" *ngIf="abierto" (click)="cerrar()"></div>
+
+<!-- Panel -->
+<div class="perfil-panel" [class.abierto]="abierto">
+
+  <div class="panel-header">
+    <h2>Mi perfil</h2>
+    <button class="btn-cerrar" (click)="cerrar()">✕</button>
+  </div>
+
+  <!-- Info del usuario -->
+  <div class="usuario-card">
+    <div class="usuario-avatar">{{ telefono ? telefono[0] : '?' }}</div>
+    <div class="usuario-info">
+      <div class="usuario-label">Número de teléfono</div>
+      <div class="usuario-telefono">{{ telefono || 'No disponible' }}</div>
+    </div>
+  </div>
+
+  <!-- Historial de pedidos -->
+  <div class="historial-header">
+    <h3>Mis pedidos</h3>
+    <button class="btn-refresh" (click)="cargarPedidos()" title="Actualizar">↻</button>
+  </div>
+
+  <div class="loading-wrap" *ngIf="loading">
+    <div class="loader-ring"></div>
+  </div>
+
+  <div class="empty-pedidos" *ngIf="!loading && pedidos.length === 0">
+    <div class="empty-icon">🛍️</div>
+    <p>Aún no tienes pedidos</p>
+  </div>
+
+  <div class="pedidos-lista" *ngIf="!loading && pedidos.length > 0">
+    <div class="pedido-item" *ngFor="let p of pedidos">
+
+      <div class="pedido-top">
+        <!-- Código copiable -->
+        <button class="codigo-btn" (click)="copiarCodigo(p.numero_orden)" title="Toca para copiar">
+          <span class="codigo-texto">{{ p.numero_orden }}</span>
+          <span class="codigo-icono" *ngIf="copiado !== p.numero_orden">📋</span>
+          <span class="codigo-copiado" *ngIf="copiado === p.numero_orden">✓ Copiado</span>
+        </button>
+
+        <!-- Estado -->
+        <span class="estado-badge"
+          [style.color]="estadoInfo(p.estado).color"
+          [style.background]="estadoInfo(p.estado).bg">
+          {{ estadoInfo(p.estado).icono }} {{ estadoInfo(p.estado).texto }}
+        </span>
+      </div>
+
+      <div class="pedido-restaurante">🏪 {{ p.nombre_restaurante }}</div>
+
+      <div class="pedido-items">
+        <span *ngFor="let d of p.detalles; let last = last">
+          {{ d.nombre_producto }} ×{{ d.cantidad }}{{ last ? '' : ', ' }}
+        </span>
+      </div>
+
+      <div class="pedido-footer">
+        <span class="pedido-fecha">{{ p.fecha | date:'dd/MM/yyyy HH:mm' }}</span>
+        <span class="pedido-total">${{ p.total | number:'1.0-0' }}</span>
+      </div>
+
+      <!-- Mensaje de acción si está pendiente -->
+      <div class="pedido-accion" *ngIf="p.estado === 1">
+        💵 Dirígete al mostrador con el código <strong>{{ p.numero_orden }}</strong>
+      </div>
+      <div class="pedido-accion listo" *ngIf="p.estado === 3">
+        🔔 ¡Tu pedido está listo! Ve a recogerlo.
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Cerrar sesión -->
+  <div class="panel-footer">
+    <button class="btn-logout" (click)="logout()">Cerrar sesión</button>
+  </div>
+
+</div>

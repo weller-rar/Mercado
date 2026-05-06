@@ -8,20 +8,13 @@ import models, schemas
 router = APIRouter(prefix="/usuarios", tags=["Usuarios"])
 
 
-# ─── Login invitado (solo teléfono, rol cliente) ──────────────────────────────
 @router.post("/login-invitado", response_model=schemas.Token)
 def login_invitado(datos: schemas.LoginInvitado, db: Session = Depends(get_session)):
-    """
-    El cliente ingresa solo su teléfono.
-    Si no existe, se crea automáticamente con rol 'cliente'.
-    Se devuelve un token de sesión.
-    """
     usuario = db.query(models.Usuario).filter(
         models.Usuario.telefono == datos.telefono
     ).first()
 
     if not usuario:
-        # Registro silencioso
         usuario = models.Usuario(
             telefono=datos.telefono,
             nombre=None,
@@ -32,24 +25,19 @@ def login_invitado(datos: schemas.LoginInvitado, db: Session = Depends(get_sessi
         db.commit()
         db.refresh(usuario)
 
-    # Solo clientes pueden usar este endpoint
     if usuario.rol != "cliente":
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Este acceso es solo para clientes. Usa el login de restaurante.",
         )
 
-    token = create_access_token({"sub": str(usuario.id_usuario)})
+    # ← "tipo": "usuario" agregado
+    token = create_access_token({"sub": str(usuario.id_usuario), "tipo": "usuario"})
     return {"access_token": token, "token_type": "bearer", "rol": usuario.rol}
 
 
-# ─── Login restaurante (teléfono + contraseña, rol restaurante) ───────────────
 @router.post("/login-restaurante", response_model=schemas.Token)
-def login_restaurante(datos: schemas.LoginRestauranteSchema, db: Session = Depends(get_session)):
-    """
-    Login exclusivo para cuentas con rol 'restaurante'.
-    Requiere teléfono + contraseña.
-    """
+def login_restaurante_usuario(datos: schemas.LoginRestauranteSchema, db: Session = Depends(get_session)):
     usuario = db.query(models.Usuario).filter(
         models.Usuario.telefono == datos.telefono
     ).first()
@@ -66,11 +54,11 @@ def login_restaurante(datos: schemas.LoginRestauranteSchema, db: Session = Depen
             detail="Teléfono o contraseña incorrectos.",
         )
 
-    token = create_access_token({"sub": str(usuario.id_usuario)})
+    # ← "tipo": "usuario" agregado
+    token = create_access_token({"sub": str(usuario.id_usuario), "tipo": "usuario"})
     return {"access_token": token, "token_type": "bearer", "rol": usuario.rol}
 
 
-# ─── Login OAuth2 estándar (para Swagger / compatibilidad) ────────────────────
 @router.post("/login", response_model=schemas.Token)
 def login(form: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_session)):
     usuario = db.query(models.Usuario).filter(
@@ -82,29 +70,24 @@ def login(form: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get
             detail="Teléfono o contraseña incorrectos",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    token = create_access_token({"sub": str(usuario.id_usuario)})
+    # ← "tipo": "usuario" agregado
+    token = create_access_token({"sub": str(usuario.id_usuario), "tipo": "usuario"})
     return {"access_token": token, "token_type": "bearer", "rol": usuario.rol}
 
 
-# ─── Registro de restaurante (solo admin) ────────────────────────────────────
 @router.post("/registro-restaurante", response_model=schemas.UsuarioResponse, status_code=status.HTTP_201_CREATED)
 def registrar_restaurante(
     datos: schemas.UsuarioCreate,
     db: Session = Depends(get_session),
     _: models.Usuario = Depends(require_rol("admin")),
 ):
-    """
-    Solo un admin puede crear cuentas de restaurante.
-    """
     existente = db.query(models.Usuario).filter(
         models.Usuario.telefono == datos.telefono
     ).first()
     if existente:
         raise HTTPException(status_code=400, detail="El teléfono ya está registrado")
-
     if not datos.contrasena:
         raise HTTPException(status_code=400, detail="Los restaurantes requieren contraseña")
-
     nuevo = models.Usuario(
         nombre=datos.nombre,
         telefono=datos.telefono,
@@ -116,8 +99,6 @@ def registrar_restaurante(
     db.refresh(nuevo)
     return nuevo
 
-
-# ─── Perfil y CRUD ────────────────────────────────────────────────────────────
 
 @router.get("/me", response_model=schemas.UsuarioResponse)
 def perfil(usuario_actual: models.Usuario = Depends(get_current_user)):

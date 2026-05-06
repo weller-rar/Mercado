@@ -26,6 +26,8 @@ const ESTADOS: any = {
 })
 export class DashboardRestauranteComponent implements OnInit, OnDestroy {
 
+  private _tokenCache: string | null = null;
+
   perfil: any = null;
   menus: any[] = [];
   productosCache: { [id_menu: number]: any[] } = {};
@@ -74,6 +76,7 @@ export class DashboardRestauranteComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     if (!this.authService.isRestauranteLoggedIn()) { this.router.navigate(['/login-restaurant']); return; }
+    this._tokenCache = this.authService.getRestauranteToken();
     this.inicializarFormularios();
     this.cargarPerfil();
   }
@@ -81,7 +84,8 @@ export class DashboardRestauranteComponent implements OnInit, OnDestroy {
   ngOnDestroy() { this.detenerPolling(); }
 
   private get headers(): HttpHeaders {
-    return new HttpHeaders({ 'Authorization': `Bearer ${this.authService.getRestauranteToken()}` });
+    const token = this._tokenCache || this.authService.getRestauranteToken();
+    return new HttpHeaders({ 'Authorization': `Bearer ${token}` });
   }
 
   inicializarFormularios() {

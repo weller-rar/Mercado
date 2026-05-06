@@ -4,7 +4,10 @@
 <!-- Header -->
 <header class="top-header">
   <div class="logo"><div class="logo-mark">🍽️</div><span class="logo-text">Court<span>Eats</span></span></div>
-  <button class="icon-btn" (click)="logout()" title="Salir">👤</button>
+  <div class="header-right">
+    <app-notificaciones></app-notificaciones>
+    <app-perfil-cliente></app-perfil-cliente>
+  </div>
 </header>
 
 <!-- ══════ VISTA: MENÚ DEL RESTAURANTE ══════ -->
