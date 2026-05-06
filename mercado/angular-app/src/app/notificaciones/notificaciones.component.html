@@ -1,0 +1,51 @@
+<!-- Botón campana -->
+<button class="btn-campana" (click)="abrir()" [class.tiene-nuevas]="notifSvc.noLeidas() > 0">
+  🔔
+  <span class="campana-badge" *ngIf="notifSvc.noLeidas() > 0">
+    {{ notifSvc.noLeidas() > 9 ? '9+' : notifSvc.noLeidas() }}
+  </span>
+</button>
+
+<!-- Overlay -->
+<div class="notif-overlay" *ngIf="abierto" (click)="cerrar()"></div>
+
+<!-- Panel -->
+<div class="notif-panel" [class.abierto]="abierto">
+
+  <div class="panel-header">
+    <h2>Notificaciones</h2>
+    <button class="btn-cerrar" (click)="cerrar()">✕</button>
+  </div>
+
+  <!-- Sin notificaciones -->
+  <div class="empty-notif" *ngIf="notifSvc.notificaciones().length === 0">
+    <div class="empty-icon">🔔</div>
+    <p>Sin notificaciones aún</p>
+    <small>Te avisaremos cuando tu pedido esté listo</small>
+  </div>
+
+  <!-- Lista -->
+  <div class="notif-lista" *ngIf="notifSvc.notificaciones().length > 0">
+    <div class="notif-item" *ngFor="let n of notifSvc.notificaciones()" [class.no-leida]="!n.leida">
+      <div class="notif-icono">🔔</div>
+      <div class="notif-body">
+        <div class="notif-orden">{{ n.numero_orden }}</div>
+        <div class="notif-mensaje">{{ n.mensaje }}</div>
+        <div class="notif-fecha">{{ formatFecha(n.fecha) }}</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Toast de nueva notificación -->
+<div class="toast-container">
+  <div class="toast" *ngFor="let n of notifSvc.notificaciones().slice(0,1)"
+       [class.visible]="!n.leida">
+    <span class="toast-icon">🔔</span>
+    <div class="toast-body">
+      <div class="toast-titulo">¡Pedido listo!</div>
+      <div class="toast-msg">{{ n.numero_orden }} en {{ n.restaurante }}</div>
+    </div>
+  </div>
+</div>

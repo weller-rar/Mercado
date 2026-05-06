@@ -6,6 +6,8 @@ import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 import { CarritoService } from '../carrito/carrito.service';
 import { CarritoComponent } from '../carrito/carrito.component';
+import { PerfilClienteComponent } from '../perfil-cliente/perfil-cliente.component';
+import { NotificacionesComponent } from '../notificaciones/notificaciones.component';
 import { forkJoin, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 
@@ -14,7 +16,7 @@ const BASE_URL = 'http://localhost:8000';
 @Component({
   selector: 'app-inicio',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, CarritoComponent],
+  imports: [CommonModule, RouterModule, FormsModule, CarritoComponent, PerfilClienteComponent, NotificacionesComponent],
   templateUrl: './inicio.component.html',
   styleUrl: './inicio.component.css'
 })
@@ -175,5 +177,4 @@ export class InicioComponent implements OnInit {
 
   cantidad(id_producto: number) { return this.carritoSvc.cantidadDeProducto(id_producto); }
 
-  logout() { this.authService.logout(); this.router.navigate(['/login']); }
 }

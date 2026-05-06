@@ -94,3 +94,6 @@
 .btn-ctrl.add { background: #6b7c4a; color: white; border-color: #6b7c4a; }
 .btn-ctrl.add:hover { background: #5a6a3b; }
 .cant-num { font-weight: 700; color: #2c2a26; min-width: 16px; text-align: center; font-size: 0.9rem; }
+
+/* Header right group */
+.header-right { display: flex; align-items: center; gap: 0.5rem; }
