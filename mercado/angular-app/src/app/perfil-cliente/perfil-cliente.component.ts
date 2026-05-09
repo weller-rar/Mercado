@@ -5,7 +5,7 @@ import { Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 import { NotificacionesService } from '../notificaciones/notificaciones.service';
 
-const BASE_URL = 'http://localhost:8000';
+const BASE_URL = 'https://mercado-production.up.railway.app';
 
 const ESTADOS: any = {
   1: { texto: 'Pendiente de pago', color: '#d69e2e', bg: '#fffaf0', icono: '⏳' },

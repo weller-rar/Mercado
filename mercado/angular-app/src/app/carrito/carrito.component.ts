@@ -5,7 +5,7 @@ import { CarritoService } from './carrito.service';
 import { AuthService } from '../services/auth.service';
 import { Router } from '@angular/router';
 
-const BASE_URL = 'http://localhost:8000';
+const BASE_URL = 'https://mercado-production.up.railway.app';
 
 const METODOS = [
   { valor: 'efectivo',      label: 'Efectivo',      icono: '💵', desc: 'Paga en el mostrador al recoger' },

@@ -11,7 +11,7 @@ import { NotificacionesComponent } from '../notificaciones/notificaciones.compon
 import { forkJoin, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 
-const BASE_URL = 'http://localhost:8000';
+const BASE_URL = 'https://mercado-production.up.railway.app';
 
 @Component({
   selector: 'app-inicio',

@@ -4,7 +4,7 @@ import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angula
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 
-const BASE_URL = 'http://localhost:8000';
+const BASE_URL = 'https://mercado-production.up.railway.app';
 
 @Component({
   selector: 'app-admin-login',

@@ -3,7 +3,7 @@ import { isPlatformBrowser } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
 
-const BASE_URL = 'http://localhost:8000';
+const BASE_URL = 'https://mercado-production.up.railway.app';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -48,7 +48,6 @@ export class AuthService {
     return this.http.post(`${BASE_URL}/usuarios/login-invitado`, { telefono }).pipe(
       tap((response: any) => {
         if (response?.access_token) {
-          // Limpiar sesión de cliente anterior en esta pestaña
           sessionStorage.clear();
           this.setSession('token', response.access_token);
           this.setSession('rol', response.rol);

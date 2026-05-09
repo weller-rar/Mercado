@@ -5,7 +5,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { NotificacionesService } from './notificaciones.service';
 import { AuthService } from '../services/auth.service';
 
-const BASE_URL = 'http://localhost:8000';
+const BASE_URL = 'https://mercado-production.up.railway.app';
 
 @Component({
   selector: 'app-notificaciones',
