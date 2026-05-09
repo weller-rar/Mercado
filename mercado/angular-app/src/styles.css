@@ -20,4 +20,9 @@
   --radius-m: 22px;
   --radius-l: 32px;
   --radius-xl: 48px;
+  * {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
 }
