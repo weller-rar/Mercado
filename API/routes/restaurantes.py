@@ -54,6 +54,7 @@ def activar_restaurante(id_restaurante: int, db: Session = Depends(get_session),
 
 # ─── Listar restaurantes públicos ─────────────────────────────────────────────
 
+
 @router.get("/restaurantes", response_model=list[schemas.RestaurantePublico])
 def listar_restaurantes(db: Session = Depends(get_session)):
     return db.query(models.Restaurante).filter(models.Restaurante.estado == True).all()

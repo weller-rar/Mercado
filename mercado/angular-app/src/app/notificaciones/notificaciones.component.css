@@ -106,3 +106,42 @@
 .toast-body { display: flex; flex-direction: column; gap: 2px; }
 .toast-titulo { font-weight: 700; font-size: 0.9rem; }
 .toast-msg { font-size: 0.8rem; color: rgba(255,255,255,0.8); }
+
+/* Calificación */
+.calificacion-box {
+  margin-top: 0.75rem; padding: 0.75rem;
+  background: white; border-radius: 8px;
+  border: 1px solid #e8e2d6;
+  display: flex; flex-direction: column; gap: 0.5rem;
+}
+.cal-pregunta { font-size: 0.8rem; font-weight: 600; color: #2c2a26; margin: 0; }
+
+.estrellas { display: flex; gap: 0.25rem; }
+.estrella {
+  background: none; border: none; font-size: 1.4rem;
+  cursor: pointer; color: #d4cfc8; transition: color 0.15s;
+  padding: 0;
+}
+.estrella.activa { color: #f6c90e; }
+.estrella:hover { color: #f6c90e; }
+
+.cal-comentario {
+  resize: none; padding: 0.5rem; border: 1px solid #e0dbd3;
+  border-radius: 6px; font-size: 0.78rem; color: #2c2a26;
+  outline: none; font-family: inherit;
+}
+.cal-comentario:focus { border-color: #6b7c4a; }
+
+.btn-calificar {
+  padding: 0.4rem 0.75rem; background: #6b7c4a; color: white;
+  border: none; border-radius: 6px; font-size: 0.78rem;
+  font-weight: 600; cursor: pointer; transition: background 0.2s;
+  align-self: flex-end;
+}
+.btn-calificar:hover:not([disabled]) { background: #5a6a3b; }
+.btn-calificar[disabled] { background: #a0a0a0; cursor: not-allowed; }
+
+.calificacion-enviada {
+  margin-top: 0.5rem; font-size: 0.78rem;
+  color: #38a169; font-weight: 600;
+}

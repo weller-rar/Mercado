@@ -2,6 +2,39 @@ from pydantic import BaseModel
 from typing import Optional, List
 from datetime import datetime
 
+class RestauranteAdmin(BaseModel):
+    id_restaurante: int
+    id_comercial: str
+    nombre: str
+    descripcion: Optional[str]
+    horario: Optional[str]
+    calificacion_promedio: float
+    estado: bool
+    imagen_url: Optional[str] = None
+    class Config:
+        from_attributes = True
+
+# ─── Calificacion ─────────────────────────────────────────────────────────────
+class CalificacionCreate(BaseModel):
+    id_restaurante: int
+    puntuacion: float
+    comentarios: Optional[str] = None
+
+class CalificacionResponse(BaseModel):
+    id_calificacion: int
+    id_usuario: int
+    id_restaurante: int
+    puntuacion: float
+    comentarios: Optional[str]
+    fecha: datetime
+    class Config:
+        from_attributes = True
+
+
+# ─── Administrador ───────────────────────────────────────────────────────────
+class LoginAdministrador(BaseModel):
+    nombre: str
+    contrasena: str
 
 # ─── Usuario ──────────────────────────────────────────────────────────────────
 class LoginInvitado(BaseModel):

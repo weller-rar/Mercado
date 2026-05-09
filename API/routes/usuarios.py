@@ -1,3 +1,5 @@
+import os
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
@@ -6,6 +8,30 @@ from routes.auth import hash_password, verify_password, create_access_token, get
 import models, schemas
 
 router = APIRouter(prefix="/usuarios", tags=["Usuarios"])
+
+
+@router.post("/administrador", response_model=schemas.Token)
+def login_administrador(data: schemas.LoginAdministrador,db: Session = Depends(get_session)):
+    usuario = db.query(models.Usuario).filter(
+        models.Usuario.nombre == data.nombre,
+        models.Usuario.rol == "root"
+    ).first()
+    
+    if not usuario:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Credenciales incorrectas para administrador.",
+        )
+        
+    if not verify_password(data.contrasena, usuario.contrasena):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Credenciales incorrectas para administrador.",
+        )
+    token = create_access_token({"sub": str(usuario.id_usuario), "tipo": "usuario"})
+    return {"access_token": token, "token_type": "bearer", "rol": usuario.rol}
+    
+    
 
 
 @router.post("/login-invitado", response_model=schemas.Token)

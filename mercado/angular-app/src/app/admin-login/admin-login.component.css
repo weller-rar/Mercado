@@ -1,0 +1,124 @@
+:host { display: block; }
+
+.bg {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #dac4af 0%, #bab2ab 50%, #a5988c 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+}
+
+.card {
+  background: #FDF6EE;
+  border-radius: 24px;
+  padding: 2.5rem 2rem;
+  width: 100%;
+  max-width: 400px;
+  box-shadow: 0 24px 64px rgba(61,43,26,0.4);
+  animation: slideUp 0.35s ease;
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(28px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+h2 {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #3D2B1A;
+  margin: 0 0 0.3rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-bottom: 1.1rem;
+}
+
+label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #7A6055;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.requerido { color: #C4956A; }
+
+input[type="text"],
+input[type="password"] {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background: white;
+  border: 1.5px solid #F0E6D3;
+  border-radius: 10px;
+  color: #3D2B1A;
+  font-size: 0.9rem;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  box-sizing: border-box;
+}
+
+input[type="text"]:focus,
+input[type="password"]:focus {
+  border-color: #C4956A;
+  box-shadow: 0 0 0 3px rgba(196,149,106,0.14);
+}
+
+input::placeholder { color: #C8B5A8; }
+
+.input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-wrap input { width: 100%; }
+
+.error-msg {
+  background: #fde8e8;
+  color: #c53030;
+  font-size: 0.8rem;
+  padding: 0.6rem 0.875rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  font-weight: 500;
+}
+
+.btn-entrar {
+  width: 100%;
+  padding: 0.9rem;
+  background: linear-gradient(135deg, #C4956A, #7A5C40);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.15s;
+  box-shadow: 0 6px 20px rgba(122,92,64,0.4);
+  letter-spacing: 0.3px;
+}
+
+.btn-entrar:hover:not([disabled]) {
+  opacity: 0.92;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 28px rgba(122,92,64,0.45);
+}
+
+.btn-entrar:active { transform: translateY(0); }
+
+.btn-entrar[disabled] {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+* { outline: none !important; }
+
+input:-webkit-autofill {
+  -webkit-box-shadow: 0 0 0 1000px white inset !important;
+  -webkit-text-fill-color: #3D2B1A !important;
+}
