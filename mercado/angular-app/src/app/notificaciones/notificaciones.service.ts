@@ -3,7 +3,7 @@ import { isPlatformBrowser } from '@angular/common';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { AuthService } from '../services/auth.service';
 
-const BASE_URL = 'http://localhost:8000';
+const BASE_URL = 'https://mercado-production.up.railway.app';
 const STORAGE_KEY = 'notificaciones_cliente';
 
 export interface Notificacion {
