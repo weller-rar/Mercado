@@ -1,0 +1,118 @@
+<div class="admin-layout">
+
+  <!-- Sidebar -->
+  <aside class="admin-sidebar">
+    <div class="sidebar-brand">
+      <span>⚙️</span>
+      <div>
+        <div class="brand-title">Admin Panel</div>
+        <div class="brand-sub">{{ adminNombre }}</div>
+      </div>
+    </div>
+    <nav>
+      <button class="nav-item" [class.active]="vistaActiva==='solicitudes'" (click)="vistaActiva='solicitudes'">
+        🔔 Solicitudes
+        <span class="badge" *ngIf="solicitudes.length > 0">{{ solicitudes.length }}</span>
+      </button>
+      <button class="nav-item" [class.active]="vistaActiva==='restaurantes'" (click)="vistaActiva='restaurantes'">
+        🏪 Restaurantes
+      </button>
+    </nav>
+    <button class="btn-logout" (click)="logout()">Cerrar sesión</button>
+  </aside>
+
+  <!-- Main -->
+  <main class="admin-main">
+
+    <!-- Loading -->
+    <div class="loading-wrap" *ngIf="loading">
+      <div class="loader"></div>
+    </div>
+
+    <!-- ════ SOLICITUDES ════ -->
+    <div *ngIf="!loading && vistaActiva==='solicitudes'">
+      <div class="page-header">
+        <h2>Solicitudes pendientes</h2>
+        <span class="count">{{ solicitudes.length }} pendiente(s)</span>
+      </div>
+
+      <div class="empty-state" *ngIf="solicitudes.length === 0">
+        <p>✅ No hay solicitudes pendientes</p>
+      </div>
+
+      <div class="cards-grid" *ngIf="solicitudes.length > 0">
+        <div class="rest-card solicitud" *ngFor="let r of solicitudes">
+          <div class="card-header">
+            <div class="rest-img" [style.backgroundImage]="r.imagen_url ? 'url('+r.imagen_url+')' : ''">
+              <span *ngIf="!r.imagen_url">🍽️</span>
+            </div>
+            <div class="rest-info">
+              <div class="rest-nombre">{{ r.nombre }}</div>
+              <div class="rest-id">{{ r.id_comercial }}</div>
+            </div>
+            <span class="estado-badge pendiente">Pendiente</span>
+          </div>
+          <div class="card-body">
+            <p *ngIf="r.descripcion">{{ r.descripcion }}</p>
+            <p *ngIf="r.horario">🕐 {{ r.horario }}</p>
+          </div>
+          <div class="card-actions">
+            <button class="btn-activar" (click)="activar(r.id_restaurante)">✓ Aprobar</button>
+            <button class="btn-rechazar" (click)="desactivar(r.id_restaurante)">✕ Rechazar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════ TODOS LOS RESTAURANTES ════ -->
+    <div *ngIf="!loading && vistaActiva==='restaurantes'">
+      <div class="page-header">
+        <h2>Todos los restaurantes</h2>
+        <button class="btn-refresh" (click)="cargarDatos()">↻ Actualizar</button>
+      </div>
+
+      <div class="tabla-wrapper">
+        <table class="tabla">
+          <thead>
+            <tr>
+              <th>Restaurante</th>
+              <th>ID Comercial</th>
+              <th>Horario</th>
+              <th>Calificación</th>
+              <th>Estado</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let r of restaurantes">
+              <td>
+                <div class="tabla-nombre">
+                  <div class="tabla-img" [style.backgroundImage]="r.imagen_url ? 'url('+r.imagen_url+')' : ''">
+                    <span *ngIf="!r.imagen_url">🍽</span>
+                  </div>
+                  <div>
+                    <div class="nombre-text">{{ r.nombre }}</div>
+                    <div class="desc-text" *ngIf="r.descripcion">{{ r.descripcion }}</div>
+                  </div>
+                </div>
+              </td>
+              <td><code>{{ r.id_comercial }}</code></td>
+              <td>{{ r.horario || '—' }}</td>
+              <td>⭐ {{ r.calificacion_promedio | number:'1.1-1' }}</td>
+              <td>
+                <span class="estado-badge" [class.activo]="r.estado" [class.inactivo]="!r.estado">
+                  {{ r.estado ? 'Activo' : 'Inactivo' }}
+                </span>
+              </td>
+              <td>
+                <button class="btn-sm activar" *ngIf="!r.estado" (click)="activar(r.id_restaurante)">Activar</button>
+                <button class="btn-sm desactivar" *ngIf="r.estado" (click)="desactivar(r.id_restaurante)">Desactivar</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </main>
+</div>

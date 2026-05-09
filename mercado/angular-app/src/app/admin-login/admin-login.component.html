@@ -1,0 +1,35 @@
+<div class="bg">
+  <div class="card">
+
+    <h2 style="margin-bottom: 20px; text-align: center;">Panel de ADMIN</h2>
+
+    <form [formGroup]="form" (ngSubmit)="onSubmit()">
+      <div class="form-group">
+        <label>Usuario <span class="requerido">*</span></label>
+        <input
+          type="text"
+          formControlName="nombre"
+          placeholder="Tu nombre de usuario"
+        />
+      </div>
+
+      <div class="form-group">
+        <label>Contraseña <span class="requerido">*</span></label>
+        <div class="input-wrap">
+          <input
+            type="password"
+            formControlName="contrasena"
+            placeholder="Tu contraseña"
+          />
+        </div>
+      </div>
+
+      <div class="error-msg" *ngIf="error">{{ error }}</div>
+
+      <button class="btn-entrar" type="submit" [disabled]="isSubmitting">
+        <div class="title">{{ isSubmitting ? 'Entrando...' : 'Ingresar' }}</div>
+      </button>
+    </form>
+
+  </div>
+</div>

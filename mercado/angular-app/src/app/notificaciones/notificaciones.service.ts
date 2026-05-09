@@ -8,6 +8,7 @@ const STORAGE_KEY = 'notificaciones_cliente';
 
 export interface Notificacion {
   id: string;
+  id_restaurante: number;
   numero_orden: string;
   restaurante: string;
   mensaje: string;
@@ -37,7 +38,6 @@ export class NotificacionesService {
 
   private cargarDesdeStorage() {
     try {
-      // sessionStorage — cada pestaña tiene sus propias notificaciones
       const raw = sessionStorage.getItem(STORAGE_KEY);
       if (raw) {
         const data: Notificacion[] = JSON.parse(raw);
@@ -72,24 +72,23 @@ export class NotificacionesService {
     const headers = new HttpHeaders({ 'Authorization': `Bearer ${token}` });
     this.http.get<any[]>(`${BASE_URL}/mis-pedidos`, { headers }).subscribe({
       next: (pedidos) => {
-        pedidos
-          .filter(p => p.estado === 3)
-          .forEach(p => {
-            const id = String(p.id_pedido);
-            if (!this._pedidosYaNotificados.has(id)) {
-              this._pedidosYaNotificados.add(id);
-              const nueva: Notificacion = {
-                id,
-                numero_orden: p.numero_orden,
-                restaurante: p.nombre_restaurante,
-                mensaje: `Tu pedido ${p.numero_orden} en ${p.nombre_restaurante} está listo para recoger. 🔔`,
-                fecha: new Date().toISOString(),
-                leida: false,
-              };
-              this._notificaciones.update(ns => [nueva, ...ns]);
-              this.guardarEnStorage();
-            }
-          });
+        pedidos.filter(p => p.estado === 3).forEach(p => {
+          const id = String(p.id_pedido);
+          if (!this._pedidosYaNotificados.has(id)) {
+            this._pedidosYaNotificados.add(id);
+            const nueva: Notificacion = {
+              id,
+              id_restaurante: p.id_restaurante,
+              numero_orden: p.numero_orden,
+              restaurante: p.nombre_restaurante,
+              mensaje: `Tu pedido ${p.numero_orden} en ${p.nombre_restaurante} está listo para recoger. 🔔`,
+              fecha: new Date().toISOString(),
+              leida: false,
+            };
+            this._notificaciones.update(ns => [nueva, ...ns]);
+            this.guardarEnStorage();
+          }
+        });
       }
     });
   }
@@ -99,18 +98,9 @@ export class NotificacionesService {
     this.guardarEnStorage();
   }
 
-  marcarLeida(id: string) {
-    this._notificaciones.update(ns =>
-      ns.map(n => n.id === id ? { ...n, leida: true } : n)
-    );
-    this.guardarEnStorage();
-  }
-
   limpiar() {
     this._notificaciones.set([]);
     this._pedidosYaNotificados.clear();
-    if (isPlatformBrowser(this.platformId)) {
-      sessionStorage.removeItem(STORAGE_KEY);
-    }
+    if (isPlatformBrowser(this.platformId)) sessionStorage.removeItem(STORAGE_KEY);
   }
 }

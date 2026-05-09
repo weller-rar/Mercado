@@ -117,7 +117,7 @@
 .submit-btn {
   width: 100%;
   padding: 0.75rem;
-  background-color: var(--olive);
+  background-color: var(--brown-soft);
   color: var(--white);
   border: none;
   border-radius: var(--radius-s);
@@ -132,7 +132,7 @@
 }
 
 .submit-btn:hover:not([disabled]) {
-  background-color: var(--olive-light);
+  background-color: var(--brown-soft);
   box-shadow: var(--shadow-s);
 }
 

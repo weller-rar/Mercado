@@ -1,4 +1,6 @@
 entra a la carpeta con cd angular-app y 
 lanza el servidor con ng serve --open
 
+
+cd .\mercado\angular-app\
 ng serve

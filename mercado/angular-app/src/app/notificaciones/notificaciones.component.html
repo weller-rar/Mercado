@@ -17,31 +17,51 @@
     <button class="btn-cerrar" (click)="cerrar()">✕</button>
   </div>
 
-  <!-- Sin notificaciones -->
   <div class="empty-notif" *ngIf="notifSvc.notificaciones().length === 0">
     <div class="empty-icon">🔔</div>
     <p>Sin notificaciones aún</p>
     <small>Te avisaremos cuando tu pedido esté listo</small>
   </div>
 
-  <!-- Lista -->
   <div class="notif-lista" *ngIf="notifSvc.notificaciones().length > 0">
     <div class="notif-item" *ngFor="let n of notifSvc.notificaciones()" [class.no-leida]="!n.leida">
+
       <div class="notif-icono">🔔</div>
       <div class="notif-body">
         <div class="notif-orden">{{ n.numero_orden }}</div>
         <div class="notif-mensaje">{{ n.mensaje }}</div>
         <div class="notif-fecha">{{ formatFecha(n.fecha) }}</div>
+
+        <!-- Calificación — oculta si ya calificó ese restaurante -->
+        <div class="calificacion-box" *ngIf="!calificacionDada(n)">
+          <p class="cal-pregunta">¿Cómo estuvo {{ n.restaurante }}?</p>
+          <div class="estrellas">
+            <button class="estrella" *ngFor="let s of [1,2,3,4,5]"
+              [class.activa]="getCalificacionTemp(n.id) >= s"
+              (click)="setCalificacionTemp(n.id, s)">★</button>
+          </div>
+          <textarea class="cal-comentario" placeholder="Comentario opcional..."
+            [(ngModel)]="comentariosTemp[n.id]" rows="2"></textarea>
+          <button class="btn-calificar"
+            [disabled]="!getCalificacionTemp(n.id)"
+            (click)="enviarCalificacion(n)">
+            Enviar calificación
+          </button>
+        </div>
+
+        <div class="calificacion-enviada" *ngIf="calificacionDada(n)">
+          ✓ Calificaste con {{ getCalificacionDada(n) }} ★
+        </div>
+
       </div>
     </div>
   </div>
 
 </div>
 
-<!-- Toast de nueva notificación -->
+<!-- Toast -->
 <div class="toast-container">
-  <div class="toast" *ngFor="let n of notifSvc.notificaciones().slice(0,1)"
-       [class.visible]="!n.leida">
+  <div class="toast" *ngFor="let n of notifSvc.notificaciones().slice(0,1)" [class.visible]="!n.leida">
     <span class="toast-icon">🔔</span>
     <div class="toast-body">
       <div class="toast-titulo">¡Pedido listo!</div>
